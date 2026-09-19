@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1d9e75">
+  <title>外卖评价</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>外卖评价</h1>
+  </header>
+
+  <main>
+    <!-- 添加订单 -->
+    <section id="view-add" class="view active">
+      <div id="draft-banner" class="banner" hidden>
+        <span>有暂存草稿，已为你保留</span>
+        <button type="button" id="draft-clear" class="link">清除暂存</button>
+      </div>
+      <form id="order-form" class="card">
+        <label class="field">
+          <span>订单截图（手动上传）</span>
+          <div class="upload" id="upload-box">
+            <input type="file" id="image" accept="image/*" hidden>
+            <img id="preview" alt="预览" hidden>
+            <button type="button" id="pick-btn" class="ghost">＋ 选择图片</button>
+          </div>
+        </label>
+
+        <label class="field">
+          <span>菜品图片（可选）</span>
+          <div class="upload" id="upload-box-dish">
+            <input type="file" id="dish" accept="image/*" hidden>
+            <img id="preview-dish" alt="预览" hidden>
+            <button type="button" id="pick-dish-btn" class="ghost">＋ 选择图片</button>
+          </div>
+        </label>
+
+        <label class="field">
+          <span>店铺名称 *</span>
+          <input type="text" id="storeName" placeholder="如：麦当劳(中央大街店)" required>
+        </label>
+
+        <div class="row">
+          <label class="field">
+            <span>城市 *</span>
+            <input type="text" id="city" placeholder="如：哈尔滨" required>
+          </label>
+          <label class="field">
+            <span>平台（自定义）</span>
+            <input type="text" id="platform" list="platform-suggest" placeholder="如：美团、饿了么…">
+            <datalist id="platform-suggest"></datalist>
+          </label>
+        </div>
+
+        <label class="field">
+          <span>外卖种类（自定义）</span>
+          <input type="text" id="foodType" list="food-suggest" placeholder="如：快餐、日料、汉堡…">
+          <datalist id="food-suggest"></datalist>
+        </label>
+
+        <label class="field">
+          <span>消费方式</span>
+          <select id="channel">
+            <option>仅外卖</option>
+            <option>外卖和堂食</option>
+            <option>仅堂食</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>点的什么</span>
+          <textarea id="items" rows="2" placeholder="如：麦辣鸡腿堡x1、薯条x1、可乐x1"></textarea>
+        </label>
+
+        <div class="row">
+          <label class="field">
+            <span>总价（元）*</span>
+            <input type="number" id="totalPrice" min="0" step="0.01" placeholder="0.00" required>
+          </label>
+          <label class="field">
+            <span>用餐人数</span>
+            <input type="number" id="people" min="1" step="1" value="1">
+          </label>
+        </div>
+
+        <label class="field">
+          <span>综合评分：<b id="rating-val">5</b> 分</span>
+          <input type="range" id="rating" min="1" max="5" step="1" value="5">
+        </label>
+
+        <label class="field">
+          <span>综合评价</span>
+          <textarea id="review" rows="3" placeholder="口味、分量、配送、性价比……"></textarea>
+        </label>
+
+        <div class="row">
+          <button type="button" id="draft-save" class="ghost">暂存</button>
+          <button type="submit" class="primary" id="submit-btn">保存订单</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 店铺总览 -->
+    <section id="view-stores" class="view">
+      <div class="toolbar">
+        <button type="button" id="export-btn" class="ghost">导出备份</button>
+        <button type="button" id="import-btn" class="ghost">导入</button>
+        <input type="file" id="import-file" accept="application/json" hidden>
+      </div>
+      <div id="store-list" class="list"></div>
+    </section>
+
+    <!-- 筛选浏览 -->
+    <section id="view-filter" class="view">
+      <div class="card">
+        <label class="field">
+          <span>城市</span>
+          <select id="f-city"><option value="">全部</option></select>
+        </label>
+        <label class="field">
+          <span>外卖种类</span>
+          <select id="f-food"><option value="">全部</option></select>
+        </label>
+        <label class="field">
+          <span>消费方式</span>
+          <select id="f-channel">
+            <option value="">全部</option>
+            <option>仅外卖</option>
+            <option>外卖和堂食</option>
+            <option>仅堂食</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>人均价格区间（元）</span>
+          <div class="row">
+            <input type="number" id="f-min" min="0" step="1" placeholder="最低">
+            <span class="dash">—</span>
+            <input type="number" id="f-max" min="0" step="1" placeholder="最高">
+          </div>
+        </label>
+        <button type="button" id="f-reset" class="ghost">重置筛选</button>
+      </div>
+      <div id="filter-list" class="list"></div>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <button class="tab active" data-view="add">＋ 添加</button>
+    <button class="tab" data-view="stores">店铺</button>
+    <button class="tab" data-view="filter">筛选</button>
+  </nav>
+
+  <script src="app.js"></script>
+</body>
+</html>
