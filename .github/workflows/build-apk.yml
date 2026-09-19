@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: '17'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -42,11 +42,31 @@ jobs:
           echo "$HOME/gradle_home/gradle-8.9/bin" >> "$GITHUB_PATH"
 
       - name: Build Debug APK
-        run: gradle assembleDebug --no-daemon --stacktrace
+        run: gradle assembleDebug --no-daemon --stacktrace > build.log 2>&1
 
       - name: Publish APK as Release
+        if: success()
         uses: softprops/action-gh-release@v2
         with:
           tag: apk-v${{ github.run_number }}
           name: Waimai APK build ${{ github.run_number }}
           files: app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Diagnose on failure (push log back to repo)
+        if: failure()
+        run: |
+          echo "=== ANDROID_HOME=$ANDROID_HOME ===" > ci-diag.txt
+          echo "=== java ===" >> ci-diag.txt
+          java -version >> ci-diag.txt 2>&1 || echo "no java" >> ci-diag.txt
+          echo "=== gradle ===" >> ci-diag.txt
+          gradle --version >> ci-diag.txt 2>&1 || echo "no gradle" >> ci-diag.txt
+          echo "=== sdkmanager --list ===" >> ci-diag.txt
+          sdkmanager --list >> ci-diag.txt 2>&1 | head -40 >> ci-diag.txt
+          echo "=== last 250 lines of build.log ===" >> ci-diag.txt
+          tail -250 build.log >> ci-diag.txt 2>&1
+          git config user.email "ci@local"
+          git config user.name "ci"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git add ci-diag.txt
+          git commit -m "ci-diag [skip ci]" || echo "nothing to commit"
+          git push origin main || echo "push failed"
